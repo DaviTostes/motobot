@@ -28,6 +28,13 @@ cron.schedule("0 9 * * *", async () => {
 
 app.post("/webhook", async (req, res) => {
   try {
+    const { poll } = req.body;
+    var answer = "";
+    if (poll.options[0].voter_count > poll.options[1].voter_count) {
+      answer = "Sim";
+    } else {
+      answer = "Não";
+    }
     const options = {
       method: "POST",
       headers: {
@@ -35,7 +42,7 @@ app.post("/webhook", async (req, res) => {
       },
       body: JSON.stringify({
         chat_id: "5060020513",
-        text: `Gabriel respondeu:`,
+        text: `Gabriel respondeu: ${answer}`,
       }),
     };
     const sendMessage = await fetch(telegramUrl + "/sendMessage", options);
