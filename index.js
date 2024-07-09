@@ -3,9 +3,9 @@ import cron from "node-cron";
 import dotenv from "dotenv";
 
 dotenv.config();
+
 const app = express();
-const telegramUrl =
-  "https://api.telegram.org/bot7111361179:AAFcmLGxQev4DKmLqx48KdfYdyWmvSIiV2Q";
+app.use(express.json());
 
 cron.schedule("0 9 * * *", async () => {
   try {
@@ -20,7 +20,7 @@ cron.schedule("0 9 * * *", async () => {
         options: JSON.stringify([{ text: "Sim" }, { text: "Não" }]),
       }),
     };
-    const sendMessage = await fetch(telegramUrl + "/sendPoll", options);
+    const sendMessage = await fetch(process.env.URL + "/sendPoll", options);
     const response = await sendMessage.json();
     console.log(`${new Date().toLocaleString()} - ok: ${response.ok}`);
   } catch (error) {
@@ -47,11 +47,13 @@ app.post("/webhook", async (req, res) => {
         text: `Gabriel respondeu: ${answer}`,
       }),
     };
-    const sendMessage = await fetch(telegramUrl + "/sendMessage", options);
+    const sendMessage = await fetch(process.env.URL + "/sendMessage", options);
     const response = await sendMessage.json();
     res.status(200).send(response);
+    return;
   } catch (error) {
     res.status(400);
+    return;
   }
 });
 
