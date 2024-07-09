@@ -35,7 +35,7 @@ app.post("/webhook", async (req, res) => {
       },
       body: JSON.stringify({
         chat_id: "5060020513",
-        text: `Gabriel respondeu no dia ${new Date().toLocaleDateString()}:`,
+        text: `Gabriel respondeu:`,
       }),
     };
     const sendMessage = await fetch(telegramUrl + "/sendMessage", options);
