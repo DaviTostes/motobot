@@ -7,7 +7,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-cron.schedule("* * * * *", async () => {
+cron.schedule("0 9 * * *", async () => {
   try {
     const options = {
       method: "POST",
@@ -15,7 +15,7 @@ cron.schedule("* * * * *", async () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        chat_id: process.env.DAVI_ID,
+        chat_id: process.env.GABRIEL_ID,
         question: "Vai hoje?",
         options: JSON.stringify([{ text: "Sim" }, { text: "Não" }]),
       }),
