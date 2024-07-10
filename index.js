@@ -1,6 +1,7 @@
 import express from "express";
 import cron from "node-cron";
 import dotenv from "dotenv";
+import createOptions from "./createOpitons.js";
 
 dotenv.config();
 
@@ -9,20 +10,22 @@ app.use(express.json());
 
 cron.schedule("0 9 * * *", async () => {
   try {
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        chat_id: process.env.GABRIEL_ID,
-        question: "Vai hoje?",
-        options: JSON.stringify([{ text: "Sim" }, { text: "Não" }]),
-      }),
-    };
+    const options = createOptions({
+      chat_id: process.env.GABRIEL_ID,
+      question: "Vai hoje?",
+      options: JSON.stringify([{ text: "Sim" }, { text: "Não" }]),
+    });
     const sendMessage = await fetch(process.env.URL + "/sendPoll", options);
     const response = await sendMessage.json();
     console.log(`${new Date().toLocaleString()} - ok: ${response.ok}`);
+
+    if (response.ok) {
+      var confimationOptions = createOptions({
+        chat_id: process.env.DAVI_ID,
+        text: "Gabriel recebeu a enquete",
+      });
+      await fetch(process.env.URL + "/sendMessage", confimationOptions);
+    }
   } catch (error) {
     console.log(error);
   }
