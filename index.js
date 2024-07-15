@@ -1,6 +1,8 @@
 import express from "express";
 import cron from "node-cron";
 import dotenv from "dotenv";
+import servless from "serverless-http";
+
 import createOptions from "./createOpitons.js";
 
 dotenv.config();
@@ -60,6 +62,4 @@ app.post("/webhook", async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
-});
+export const handler = servless(app);
