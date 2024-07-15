@@ -8,10 +8,10 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-cron.schedule("0 9 * * *", async () => {
+cron.schedule("* * * * *", async () => {
   try {
     const options = createOptions({
-      chat_id: process.env.GABRIEL_ID,
+      chat_id: process.env.DAVI_ID,
       question: "Vai hoje?",
       options: JSON.stringify([{ text: "Sim" }, { text: "Não" }]),
     });
