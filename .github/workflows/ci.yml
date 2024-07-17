@@ -1,0 +1,34 @@
+name: Check Git Status
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-status:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check Git Status
+        id: git_status
+        run: |
+          status_output=$(git status)
+          echo "$status_output"
+          echo "::set-output name=status::$status_output"
+
+      - name: Process Git Status
+        run: |
+          echo "Git status output:"
+          echo "${{ steps.git_status.outputs.status }}"
+
+          if echo "${{ steps.git_status.outputs.status }}" | grep -q "Your branch is up to date with 'origin/main'."; then
+            echo "There are changes not staged for commit."
+          elif echo "${{ steps.git_status.outputs.status }}" | grep -q "Untracked files"; then
+            echo "There are untracked files."
+          else
+            echo "The working directory is clean."
+          fi
