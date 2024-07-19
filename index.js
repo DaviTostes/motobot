@@ -1,6 +1,7 @@
 import express from "express";
 import cron from "node-cron";
 import dotenv from "dotenv";
+import fs from "fs";
 
 import createOptions from "./createOpitons.js";
 
@@ -9,7 +10,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-cron.schedule("0 12 * * *", async () => {
+cron.schedule("* * * * *", async () => {
   try {
     const options = createOptions({
       chat_id: process.env.GABRIEL_ID,
@@ -18,7 +19,15 @@ cron.schedule("0 12 * * *", async () => {
     });
     const sendMessage = await fetch(process.env.URL + "/sendPoll", options);
     const response = await sendMessage.json();
-    console.log(`${new Date().toLocaleString()} - ok: ${response.ok}`);
+
+    fs.appendFile(
+      "log.txt",
+      `${new Date().toLocaleString()} - ok: ${response.ok}`,
+      { encoding: "utf-8", flag: "a+" },
+      (error) => {
+        console.log(error);
+      },
+    );
 
     if (response.ok) {
       var confimationOptions = createOptions({
