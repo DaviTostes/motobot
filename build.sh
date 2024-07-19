@@ -1,5 +1,7 @@
 #!/bin/bash
 
-sudo docker build -t motobot .
-sudo docker run --name motobot -d -p 8080:8080 motobot
+sudo docker rm -f motobot
+sudo docker rmi -f motobot:latest
+sudo docker build -t motobot:latest .
+sudo docker run --name motobot:latest -d -p 8080:8080 motobot
 echo done!
