@@ -1,16 +1,13 @@
-import express from "express";
 import cron from "node-cron";
 import dotenv from "dotenv";
-import fs from "fs";
 
 import createOptions from "./createOpitons.js";
 
 dotenv.config();
 
-const app = express();
-app.use(express.json());
+let newestMessage = "";
 
-cron.schedule("* * * * *", async () => {
+cron.schedule("0 9 * * *", async () => {
   try {
     const options = createOptions({
       chat_id: process.env.GABRIEL_ID,
@@ -19,57 +16,56 @@ cron.schedule("* * * * *", async () => {
     });
     const sendMessage = await fetch(process.env.URL + "/sendPoll", options);
     const response = await sendMessage.json();
-
-    fs.appendFile(
-      "log.txt",
-      `${new Date().toLocaleString()} - ok: ${response.ok}`,
-      { encoding: "utf-8", flag: "a+" },
-      (error) => {
-        console.log(error);
-      },
-    );
+    newestMessage = response.result.message_id;
 
     if (response.ok) {
-      var confimationOptions = createOptions({
-        chat_id: process.env.DAVI_ID,
-        text: "Gabriel recebeu a enquete",
-      });
-      await fetch(process.env.URL + "/sendMessage", confimationOptions);
+      await fetch(
+        process.env.URL + "/pinChatMessage",
+        createOptions({
+          chat_id: process.env.GABRIEL_ID,
+          message_id: newestMessage,
+        }),
+      );
+      await fetch(
+        process.env.URL + "/sendMessage",
+        createOptions({
+          chat_id: process.env.DAVI_ID,
+          text: "Gabriel recebeu a enquete",
+        }),
+      );
     }
   } catch (error) {
     console.log(error);
   }
 });
 
-app.post("/webhook", async (req, res) => {
+cron.schedule("0 * * * *", async () => {
   try {
-    const { poll } = req.body;
-    var answer = "";
+    if (!newestMessage) return;
+
+    let getChat = await fetch(
+      process.env.URL + "/getChat?chat_id=" + process.env.GABRIEL_ID,
+    );
+    let response = await getChat.json();
+
+    let poll = response.result.pinned_message.poll;
+    if (poll.total_voter_count <= 0) return;
+
+    let answer = "Não";
     if (poll.options[0].voter_count > poll.options[1].voter_count) {
       answer = "Sim";
-    } else {
-      answer = "Não";
     }
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+
+    await fetch(
+      process.env.URL + "/sendMessage",
+      createOptions({
         chat_id: process.env.DAVI_ID,
         text: `Gabriel respondeu: ${answer}`,
       }),
-    };
-    const sendMessage = await fetch(process.env.URL + "/sendMessage", options);
-    const response = await sendMessage.json();
-    res.status(200).send(response);
-    return;
-  } catch (error) {
-    res.status(400);
-    return;
-  }
-});
+    );
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT}`);
+    newestMessage = "";
+  } catch (error) {
+    console.log(error);
+  }
 });
