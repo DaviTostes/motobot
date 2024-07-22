@@ -6,5 +6,5 @@ USER root
 RUN npm install
 COPY --chown=node:node . .
 USER node
-EXPOSE 8080
+ENV TZ="America/Sao_Paulo"
 CMD [ "node", "index.js" ]
