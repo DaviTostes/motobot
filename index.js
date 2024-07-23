@@ -39,7 +39,7 @@ cron.schedule("0 14 * * *", async () => {
   }
 });
 
-cron.schedule("0 * * * *", async () => {
+cron.schedule("*/15 * * * *", async () => {
   try {
     if (!newestMessage) return;
 
