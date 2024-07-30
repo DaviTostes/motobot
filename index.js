@@ -12,7 +12,7 @@ cron.schedule("0 14 * * *", async () => {
     const options = createOptions({
       chat_id: process.env.GABRIEL_ID,
       question: "Vai hoje?",
-      options: JSON.stringify([{ text: "Sim" }, { text: "Não" }]),
+      options: JSON.stringify([{ text: "18h" }, { text: "19h" }, { text: "Nop" }]),
     });
     const sendMessage = await fetch(process.env.URL + "/sendPoll", options);
     const response = await sendMessage.json();
@@ -51,10 +51,15 @@ cron.schedule("0 * * * *", async () => {
     let poll = response.result.pinned_message.poll;
     if (poll.total_voter_count <= 0) return;
 
-    let answer = "Não";
-    if (poll.options[0].voter_count > poll.options[1].voter_count) {
-      answer = "Sim";
-    }
+    let answer = ""
+
+    poll.options.forEach((option) => {
+      if (option.voter_count > 0) {
+        answer = option.text
+      }
+    })
+
+    if (answer === "") return;
 
     await fetch(
       process.env.URL + "/sendMessage",
